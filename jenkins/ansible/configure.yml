@@ -35,7 +35,9 @@
       when: ansible_facts['os_family'] == "Darwin"
 
     - name: Install requests using pip
-      command: pip install requests
+      ansible.builtin.pip:
+        name: requests
+        state: present
       
     - name: Creates {{ service_name }} directory
       ansible.builtin.file:
