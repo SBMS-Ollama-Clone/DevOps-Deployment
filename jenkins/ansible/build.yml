@@ -12,8 +12,13 @@
       command: /opt/homebrew/bin/mvn clean install package -DskipTests
       args:
         chdir: "{{ workspace }}"
+    - name: Build the docker image
+      command: /usr/local/bin/docker build -t kimleangsrd/config-server .
+      args:
+        chdir: "{{ workspace }}"
     - name: Login to registry
-      community.docker.docker_login:
+      docker_login:
+        registry: https://index.docker.io/v1/
         username: "{{ docker_username }}"
         password: "{{ docker_password }}"
         reauthorize: yes
