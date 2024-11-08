@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  vars:
+    image_tags: "{{ version | default('latest') }}"
+    project_name: "{{ project_name }}"
+    workspace: "{{ workspace }}"
+    docker_username: credentials('docker-username')
+    docker_password: credentials('docker-password')
+  tasks:
+    - name: Build the project using maven
+      command: /opt/homebrew/bin/mvn clean install package -DskipTests
+      args:
+        chdir: "{{ workspace }}"
+    - name: Login to registry
+      docker_login:
+        registry: https://hub.docker.com
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
+        reauthorize: yes

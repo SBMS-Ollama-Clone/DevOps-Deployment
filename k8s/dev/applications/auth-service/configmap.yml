@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-configmap
+data:
+  DATASOURCE_URL: "jdbc:postgresql://postgres-auth-service:5433/auth-service"
+  DATASOURCE_USERNAME: "postgres"
+  DATASOURCE_PASSWORD: "postgres"

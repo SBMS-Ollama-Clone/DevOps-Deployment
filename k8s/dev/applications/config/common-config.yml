@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-config
+data:
+#  LOKI_URL: "http://loki:3100/loki/api/v1/push"
+#  EUREKA_URI: "http://discovery-service:8761/eureka"
+#  CONFIG_SERVER_ENDPOINT: "http://config-server:9999"
+#  TEMPO_ZIPKIN_ENDPOINT: "http://tempo:9411/api/v2/spans"
+#  GATEWAY_SERVICE_ENDPOINT: "http://gateway-service:8080"
+#  AUTH_SERVICE_ENDPOINT_HTTP: "http://auth-service:8888"
+#  REDIS_HOST: "redis"
+#  REDIS_PORT: "6379"
+#  RABBITMQ_HOST: "rabbitmq"
+#  RABBITMQ_PORT: "5672"
+#  RABBITMQ_USERNAME: "rabbitmq"
+#  RABBITMQ_PASSWORD: "rabbitmq"
+  LOKI_URL: "http://loki.default.svc.cluster.local:3100/loki/api/v1/push"
+  EUREKA_URI: "http://discovery-service.default.svc.cluster.local:8761/eureka"
+  CONFIG_SERVER_ENDPOINT: "http://config-server.default.svc.cluster.local:9999"
+  TEMPO_ZIPKIN_ENDPOINT: "http://tempo.default.svc.cluster.local:9411/api/v2/spans"
+  GATEWAY_SERVICE_ENDPOINT: "http://gateway-service.default.svc.cluster.local:8080"
+  AUTH_SERVICE_ENDPOINT_HTTP: "http://auth-service.default.svc.cluster.local:8888"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  RABBITMQ_HOST: "rabbitmq"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USERNAME: "rabbitmq"
+  RABBITMQ_PASSWORD: "rabbitmq"

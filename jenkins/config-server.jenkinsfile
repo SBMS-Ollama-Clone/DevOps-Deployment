@@ -1,0 +1,138 @@
+pipeline {
+    agent any
+    environment {
+        PROJECT_NAME= "SBMS-Ollama-Clone"
+        SERVICE_NAME= "Config-Server"
+        REPO_NAME='config-server'
+        APP_ENV = getAppEnv(env.JENKINS_URL)
+    }
+    stages {
+        stage('Parameters') {
+            steps {
+                script {
+                    properties([
+                        parameters([
+                            [$class: 'ChoiceParameter', 
+                                    choiceType: 'PT_SINGLE_SELECT', 
+                                    description: '', 
+                                    filterLength: 1, 
+                                    filterable: true, 
+                                    name: 'branch', 
+                                    script: [
+                                        $class: 'GroovyScript', 
+                                        fallbackScript: [
+                                            classpath: [], 
+                                            sandbox: false, 
+                                            script: 
+                                                    "return['Could not get The Branch Name']"
+                                        ], 
+                                        script: [ classpath: [], sandbox: false, script: """
+                                        def gettags = ("git ls-remote -t -h git@github.com:SBMS-Ollama-Clone/Config-Server.git").execute()
+                                        def branchList = gettags.text.readLines().collect {
+                                            it.split()[1].replaceAll('refs/heads/', '').replaceAll('refs/tags/', '')
+                                        }
+                                        branchList.add(0, 'main:selected')
+                                        return branchList
+                                        """.stripIndent()
+                                        ]
+                                    ]
+                            ],
+                            text(name: 'Release_Note', defaultValue: 'Some Release Note', description: ''),
+                        ])
+                    ])
+                }
+            }
+        }
+	stage("PWD") {
+            steps {
+                script {
+                    sh """
+                        pwd
+                    """
+                }
+            }
+        }
+        stage("Configure") {
+            steps {
+                script {
+                    sh """
+                        /opt/homebrew/bin/ansible-playbook \
+                            ./DevOps-Deployment/jenkins/ansible/configure.yml \
+                            -i ./DevOps-Deployment/jenkins/ansible/hosts \
+                            -e workspace="${WORKSPACE}/Config-Server" \
+                            -e project_name="${PROJECT_NAME}" \
+                            -e service_name="${SERVICE_NAME}" \
+                            -e build_user="${BUILD_USER}" \
+                            -e git_branch="${branch}" 
+                    """
+                }
+            }
+        }
+        stage("Build") {
+            steps {
+                script {
+                    sh """
+                        /opt/homebrew/bin/ansible-playbook \
+                            ./DevOps-Deployment/jenkins/ansible/build.yml \
+                            -i ./DevOps-Deployment/jenkins/ansible/hosts \
+                            -e version="${APP_ENV}-${BUILD_NUMBER}" \
+                            -e project_name="${PROJECT_NAME}" \
+                            -e workspace="${WORKSPACE}/Config-Server" \
+                            -e registry_name="${REPO_NAME}" 
+                    """
+                }
+            }
+        }
+        // stage("Deploy") {
+        //     environment {
+        //         APP_PORT = "8888"
+        //         CONTAINER_PORT = "8888"
+        //         BUILD_TYPE="API"
+        //     }
+        //     steps {
+        //         script {
+        //             sh """ 
+        //                 ansible-playbook \
+        //                     ansible/deployment.yml \
+        //                     -i ansible/hosts \
+        //                         -e version="${APP_ENV}-${BUILD_NUMBER}" \
+        //                         -e project_name="${PROJECT_NAME}" \
+        //                         -e workspace="${WORKSPACE}" \
+        //                         -e service_name="${SERVICE_NAME}" \
+        //                         -e app_port="${APP_PORT}" \
+        //                         -e container_port="${CONTAINER_PORT}" \
+        //                         -e container_name="${SERVICE_NAME}_${APP_ENV}" \
+        //                         -e build_type='${BUILD_TYPE}' \
+        //                         -e registry_name="${REPO_NAME}" 
+        //             """
+        //         }
+        //     }
+        // }
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+    }
+    // post{
+    //     always{
+    //         script{
+    //             sh """ 
+    //                 curl     --location 'https://webexapis.com/v1/messages' \
+    //                             --header 'Authorization: ${Webex_Token}' \
+    //                             --form 'roomId=${Webex_RoomID}' \
+    //                             --form "html=Stage: Deploy ${PROJECT_NAME} on service ${SERVICE_NAME} <br> Status: ${currentBuild.currentResult} <br> Version: ${APP_ENV}-${BUILD_NUMBER} <br> Environment: ${APP_ENV} <br>  Builder: ${BUILD_USER} <br> Release Note: <pre>${Release_Note}</pre>"
+    //             """
+    //             cleanWs()
+    //         }
+    //     }
+    // }
+}
+
+def getAppEnv(jenkins_url){
+	if (jenkins_url.contains("localhost")) {
+        return "local"
+    } else if (jenkins_url.contains("dev")) {
+        return "dev"
+    } 
+}

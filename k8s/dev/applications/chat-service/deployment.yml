@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-service
+  template:
+    metadata:
+      labels:
+        app: chat-service
+    spec:
+      containers:
+        - name: chat-service
+          image: kimleangsrd/chat-service:0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9990
+          resources:
+            requests:
+              cpu: 10m
+              memory: 500Mi
+          env:
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: LOKI_URL
+                  name: common-config
+            - name: DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: DATASOURCE_URL
+                  name: chat-service-configmap
+            - name: DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  key: DATASOURCE_USERNAME
+                  name: chat-service-configmap
+            - name: DATASOURCE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  key: DATASOURCE_PASSWORD
+                  name: chat-service-configmap
+            - name: EUREKA_URI
+              valueFrom:
+                configMapKeyRef:
+                  key: EUREKA_URI
+                  name: chat-service-configmap

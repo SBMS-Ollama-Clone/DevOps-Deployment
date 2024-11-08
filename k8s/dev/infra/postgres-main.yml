@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: postgres-main-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-main-service
+  template:
+    metadata:
+      labels:
+          app: postgres-main-service
+    spec:
+      containers:
+      - name: postgres-main-service
+        image: postgres:latest
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-main-service-secret
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-main-service-secret
+              key: POSTGRES_PASS
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-main-service-secret
+              key: POSTGRES_DB
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-vol
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-vol
+        persistentVolumeClaim:
+          claimName: postgres-main-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-main-service
+spec:
+    selector:
+        app: postgres-main-service
+    ports:
+      - protocol: TCP
+        port: 5432
+        targetPort: 5432
+    type: LoadBalancer
