@@ -7,6 +7,7 @@
     workspace: "{{ workspace }}"
     docker_username: credentials('docker-username')
     docker_password: credentials('docker-password')
+    docker_url: "unix:///var/run/docker.sock"
   tasks:
     - name: Build the project using maven
       command: /opt/homebrew/bin/mvn clean install package -DskipTests
