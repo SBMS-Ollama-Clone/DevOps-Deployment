@@ -13,8 +13,7 @@
       args:
         chdir: "{{ workspace }}"
     - name: Login to registry
-      docker_login:
-        registry: https://hub.docker.com
+      community.docker.docker_login:
         username: "{{ docker_username }}"
         password: "{{ docker_password }}"
         reauthorize: yes
