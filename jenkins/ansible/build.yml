@@ -7,11 +7,7 @@
     workspace: "{{ workspace }}"
   tasks:
     - name: Build the project using maven
-      with_maven:
-        executable: mvn
-        goals: clean install
-        project_file: "{{ workspace }}/pom.xml"
-        settings_file: "{{ workspace }}/settings.xml"
+      command: mvn clean package -DskipTests
       args:
         chdir: "{{ workspace }}"
     # - name: Build the docker image
