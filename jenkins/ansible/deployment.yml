@@ -28,7 +28,7 @@
         restart_policy: always
         networks:
           - name: "{{ project_name }}"
-        env_file: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/_global.env"
+        env_file: "./DevOps-Deployment/jenkins/ansible/_global.env"
 
     - name: Add a container to a network and leaving existing containers connected
       community.docker.docker_network:
