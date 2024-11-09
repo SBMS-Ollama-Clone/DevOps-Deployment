@@ -14,7 +14,7 @@
         username: "{{ docker_username }}"
         password: "{{ docker_password }}"
         reauthorize: yes
-        
+
     - name: Echo workspace var
       ansible.builtin.debug:
         msg: "{{ workspace }}"
@@ -26,7 +26,7 @@
     
     - name: Copy the Global ENV file
       ansible.builtin.copy:
-        src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/_global.env"
+        remote_src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/_global.env"
         dest: "{{ workspace }}/_global.env"
 
     - name: Start Config-Server API
