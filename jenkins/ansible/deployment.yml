@@ -3,6 +3,7 @@
   gather_facts: yes
   vars:
     project_name: "{{ project_name }}"
+    service_name: "{{ service_name }}"
     workspace: "{{ workspace }}"
     registry: "{{ registry }}"
     image_tags: "{{ version | default('latest') }}"
@@ -32,17 +33,17 @@
 
     - name: Start Config-Server API
       community.docker.docker_container:
-        name: config-server
-        image: "kimleangsrd/config-server:local-50"
+        name: {{ service_name }}
+        image: "{{ registry }}:{{ image_tags }}"
         state: started
         restart_policy: always
         networks:
           - name: "{{ project_name }}"
         env_file: "{{ workspace }}/_global.env"
 
-    - name: Add a container to a network and leaving existing containers connected
-      community.docker.docker_network:
-        name: "{{ project_name }}"
-        connected:
-          - "{{ service_name }}"
-        appends: true
+    # - name: Add a container to a network and leaving existing containers connected
+    #   community.docker.docker_network:
+    #     name: "{{ service_name }}"
+    #     connected:
+    #       - "{{ service_name }}"
+    #     appends: true
