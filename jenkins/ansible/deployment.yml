@@ -1,5 +1,5 @@
 ---
-- hosts: digital-platform
+- hosts: localhost
   gather_facts: yes
   vars:
     project_name: "{{ project_name }}"
