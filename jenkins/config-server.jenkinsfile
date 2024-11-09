@@ -49,7 +49,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        ansible-playbook \
+                        ansible-playbook -v \
                             ./DevOps-Deployment/jenkins/ansible/configure.yml \
                             -i ./DevOps-Deployment/jenkins/ansible/hosts \
                             -e workspace="${WORKSPACE}/Config-Server" \
