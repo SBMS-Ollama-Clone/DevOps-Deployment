@@ -2,18 +2,18 @@
 - hosts: localhost
   gather_facts: yes
   vars:
-    image_tags: "{{ version | default('latest') }}"
-    project_name: "{{ project_name }}"
     workspace: "{{ workspace }}"
+    registry: "{{ registry }}"
+    image_tags: "{{ version | default('latest') }}"
   tasks:
     - name: Build the project using maven
       command: mvn clean package -DskipTests
       args:
         chdir: "{{ workspace }}"
-    # - name: Build the docker image
-    #   command: /usr/local/bin/docker build -t kimleangsrd/config-server .
-    #   args:
-    #     chdir: "{{ workspace }}"
+    - name: Build the docker image
+      command: docker build -t "{{ registry }}:{{ image_tags }}" .
+      args:
+        chdir: "{{ workspace }}"
     # - name: Login to registry
     #   docker_login:
     #     registry: https://index.docker.io/v1/

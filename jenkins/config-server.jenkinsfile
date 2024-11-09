@@ -3,6 +3,7 @@ pipeline {
     environment {
         PROJECT_NAME = 'SBMS-Ollama-Clone'
         SERVICE_NAME = 'Config-Server'
+        REGISTRY_USER = 'kimleangsrd'
         REPO_NAME = 'config-server'
         APP_ENV = getAppEnv(env.JENKINS_URL)
     }
@@ -68,7 +69,7 @@ pipeline {
                             -e version="${APP_ENV}-${BUILD_NUMBER}" \
                             -e project_name="${PROJECT_NAME}" \
                             -e workspace="${WORKSPACE}/Config-Server" \
-                            -e registry_name="${REPO_NAME}"
+                            -e registry="${REGISTRY_USER}/${REPO_NAME}"
                     """
                 }
             }
