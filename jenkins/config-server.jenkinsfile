@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        PROJECT_NAME = 'SBMS-Ollama-Clone'
-        SERVICE_NAME = 'Config-Server'
+        PROJECT_NAME = 'sbms-ollama-clone'
+        SERVICE_NAME = 'config-server'
         REGISTRY_USER = 'kimleangsrd'
         REPO_NAME = 'config-server'
         DOCKER_USERNAME = credentials('docker-username')
