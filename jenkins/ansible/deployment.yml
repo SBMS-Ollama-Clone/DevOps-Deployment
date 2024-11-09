@@ -14,6 +14,10 @@
         username: "{{ docker_username }}"
         password: "{{ docker_password }}"
         reauthorize: yes
+        
+    - name: Echo workspace var
+      ansible.builtin.debug:
+        msg: "{{ workspace }}"
 
     - name: Create a network
       community.docker.docker_network:
@@ -22,10 +26,8 @@
     
     - name: Copy the Global ENV file
       ansible.builtin.copy:
-        src: "./DevOps-Deployment/jenkins/ansible/_global.env"
+        src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/_global.env"
         dest: "{{ workspace }}/_global.env"
-      args:
-        chdir: "{{ workspace }}"
 
     - name: Start Config-Server API
       community.docker.docker_container:
