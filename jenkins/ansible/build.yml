@@ -27,5 +27,3 @@
     - name: Push the docker image to registry
       community.docker.docker_image_push:
         name: "{{ registry }}:{{ image_tags }}"
-      args:
-        chdir: "{{ workspace }}"
