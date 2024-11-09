@@ -33,7 +33,7 @@
     - name: Start Config-Server API
       community.docker.docker_container:
         name: config-server
-        image: "{{ registry }}/config-server:{{ image_tags }}"
+        image: "{{ registry }}:{{ image_tags }}"
         state: started
         restart_policy: always
         networks:
