@@ -72,8 +72,8 @@ pipeline {
                             -e project_name="${PROJECT_NAME}" \
                             -e workspace="${WORKSPACE}/Config-Server" \
                             -e registry="${REGISTRY_USER}/${REPO_NAME}" \
-                            -e docker_username='$DOCKER_USERNAME' \
-                            -e docker_password='$DOCKER_PASSWORD'
+                            -e docker_username=$DOCKER_USERNAME \
+                            -e docker_password=$DOCKER_PASSWORD
                     """
                 }
             }
