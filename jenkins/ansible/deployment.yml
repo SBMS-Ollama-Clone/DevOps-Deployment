@@ -33,7 +33,7 @@
 
     - name: Start Config-Server API
       community.docker.docker_container:
-        name: {{ service_name }}
+        name: "{{ service_name }}"
         image: "{{ registry }}:{{ image_tags }}"
         state: started
         restart_policy: always

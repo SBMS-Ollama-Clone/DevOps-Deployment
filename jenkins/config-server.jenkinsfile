@@ -65,7 +65,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        ansible-playbook \
+                        ansible-playbook -v \
                             ./DevOps-Deployment/jenkins/ansible/build.yml \
                             -i ./DevOps-Deployment/jenkins/ansible/hosts \
                             -e version="${APP_ENV}-${BUILD_NUMBER}" \
@@ -83,7 +83,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        ansible-playbook \
+                        ansible-playbook -v \
                             ./DevOps-Deployment/jenkins/ansible/deployment.yml \
                             -i ./DevOps-Deployment/jenkins/ansible/hosts \
                             -e version="${APP_ENV}-${BUILD_NUMBER}" \
