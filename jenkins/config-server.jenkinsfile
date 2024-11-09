@@ -88,7 +88,7 @@ pipeline {
                             -e version="${APP_ENV}-${BUILD_NUMBER}" \
                             -e project_name="${PROJECT_NAME}" \
                             -e service_name="${SERVICE_NAME}" \
-                            -e workspace="${WORKSPACE}/Config-Server" \
+                            -e workspace="${WORKSPACE}" \
                             -e registry="${REGISTRY_USER}/${REPO_NAME}" \
                             -e docker_username=$DOCKER_USERNAME \
                             -e docker_password=$DOCKER_PASSWORD
