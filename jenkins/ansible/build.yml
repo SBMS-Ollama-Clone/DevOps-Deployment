@@ -12,12 +12,20 @@
       command: mvn clean package -DskipTests
       args:
         chdir: "{{ workspace }}"
+
     - name: Build the docker image
       command: docker build -t "{{ registry }}:{{ image_tags }}" .
       args:
         chdir: "{{ workspace }}"
+
     - name: Login to registry
-      docker_login:
+      community.docker.docker_login:
         username: "{{ docker_username }}"
         password: "{{ docker_password }}"
         reauthorize: yes
+
+    - name: Push the docker image to registry
+      community.docker.docker_image_push:
+        name: "{{ registry }}:{{ image_tags }}"
+      args:
+        chdir: "{{ workspace }}"
