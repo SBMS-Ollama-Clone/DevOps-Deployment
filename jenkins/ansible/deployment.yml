@@ -29,6 +29,8 @@
         networks:
           - name: "{{ project_name }}"
         env_file: "./DevOps-Deployment/jenkins/ansible/_global.env"
+      args:
+        chdir: "{{ workspace }}"
 
     - name: Add a container to a network and leaving existing containers connected
       community.docker.docker_network:

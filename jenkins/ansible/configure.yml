@@ -18,10 +18,4 @@
         dest: "{{ workspace }}"
         single_branch: yes
         version: "{{ git_branch }}"
-   
-    - name: Echo the workspace
-      ansible.builtin.debug:
-        msg: "{{ workspace }}"
-    - name: List the files in the workspace
-      ansible.builtin.shell: ls -la "{{ workspace }}"
-      register: ls_output
+        update: yes
