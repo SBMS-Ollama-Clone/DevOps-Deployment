@@ -31,15 +31,26 @@
         src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/env/_global.env"
         dest: "{{ workspace }}/_global.env"
 
+    - name: Copy the Service ENV file
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/env/{{ service_name }}.env"
+        dest: "{{ workspace }}/{{ service_name }}.env"
+
     - name: Start Config-Server API
-      community.docker.docker_container:
-        name: "{{ service_name }}"
-        image: "{{ registry }}:{{ image_tags }}"
-        state: started
-        restart_policy: always
-        networks:
-          - name: "{{ project_name }}"
-        env_file: "{{ workspace }}/_global.env"
+      community.docker.docker_compose_v2:
+        project_name: "{{ project_name }}"
+        recreate: always
+        definition:
+          services:
+            config-server:
+              image: "{{ registry }}:{{ image_tags }}"
+              container_name: "{{ service_name }}"
+              ports:
+                - "8888:8888"
+              envFile:
+                - "{{ workspace }}/_global.env"
+                - "{{ workspace }}/{{ service_name }}.env"
 
     - name: Add a container to a network and leaving existing containers connected
       community.docker.docker_network:

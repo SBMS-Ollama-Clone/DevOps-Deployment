@@ -24,6 +24,6 @@
         password: "{{ docker_password }}"
         reauthorize: yes
 
-    - name: Push the docker image to registry
-      community.docker.docker_image_push:
-        name: "{{ registry }}:{{ image_tags }}"
+    # - name: Push the docker image to registry
+    #   community.docker.docker_image_push:
+    #     name: "{{ registry }}:{{ image_tags }}"
