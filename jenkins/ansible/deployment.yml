@@ -44,9 +44,13 @@
     - name: Add a container to backend
       community.docker.docker_network:
         name: backend
+        connected:
+          - name: "{{ service_name }}"
         state: present
     
     - name: Add a container to monitoring networks
       community.docker.docker_network:
         name: monitoring
+        connected:
+          - name: "{{ service_name }}"
         state: present
