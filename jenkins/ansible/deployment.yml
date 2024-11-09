@@ -41,9 +41,12 @@
           - name: "{{ project_name }}"
         env_file: "{{ workspace }}/_global.env"
 
-    - name: Add a container to a network and leaving existing containers connected
+    - name: Add a container to backend
       community.docker.docker_network:
-        name: "{{ service_name }}"
-        connected:
-          - "{{ service_name }}"
-        appends: true
+        name: backend
+        state: present
+    
+    - name: Add a container to monitoring networks
+      community.docker.docker_network:
+        name: monitoring
+        state: present
