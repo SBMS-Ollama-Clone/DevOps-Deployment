@@ -58,24 +58,19 @@ pipeline {
                 }
             }
         }
-        // stage('Build') {
-        //     steps {
-        //         script {
-        //             sh """
-        //                 ansible-playbook \
-        //                     ./DevOps-Deployment/jenkins/ansible/build.yml \
-        //                     -i ./DevOps-Deployment/jenkins/ansible/hosts \
-        //                     -e version="${APP_ENV}-${BUILD_NUMBER}" \
-        //                     -e project_name="${PROJECT_NAME}" \
-        //                     -e workspace="${WORKSPACE}/Config-Server" \
-        //                     -e registry_name="${REPO_NAME}"
-        //             """
-        //         }
-        //     }
-        // }
-        stage('Clean Workspace') {
+        stage('Build') {
             steps {
-                cleanWs()
+                script {
+                    sh """
+                        ansible-playbook \
+                            ./DevOps-Deployment/jenkins/ansible/build.yml \
+                            -i ./DevOps-Deployment/jenkins/ansible/hosts \
+                            -e version="${APP_ENV}-${BUILD_NUMBER}" \
+                            -e project_name="${PROJECT_NAME}" \
+                            -e workspace="${WORKSPACE}/Config-Server" \
+                            -e registry_name="${REPO_NAME}"
+                    """
+                }
             }
         }
     }

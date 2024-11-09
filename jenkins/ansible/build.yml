@@ -5,21 +5,22 @@
     image_tags: "{{ version | default('latest') }}"
     project_name: "{{ project_name }}"
     workspace: "{{ workspace }}"
-    docker_username: credentials('docker-username')
-    docker_password: credentials('docker-password')
-    docker_url: "unix:///var/run/docker.sock"
   tasks:
     - name: Build the project using maven
-      command: /opt/homebrew/bin/mvn clean install package -DskipTests
+      with_maven:
+        executable: mvn
+        goals: clean install
+        project_file: "{{ workspace }}/pom.xml"
+        settings_file: "{{ workspace }}/settings.xml"
       args:
         chdir: "{{ workspace }}"
-    - name: Build the docker image
-      command: /usr/local/bin/docker build -t kimleangsrd/config-server .
-      args:
-        chdir: "{{ workspace }}"
-    - name: Login to registry
-      docker_login:
-        registry: https://index.docker.io/v1/
-        username: "{{ docker_username }}"
-        password: "{{ docker_password }}"
-        reauthorize: yes
+    # - name: Build the docker image
+    #   command: /usr/local/bin/docker build -t kimleangsrd/config-server .
+    #   args:
+    #     chdir: "{{ workspace }}"
+    # - name: Login to registry
+    #   docker_login:
+    #     registry: https://index.docker.io/v1/
+    #     username: "{{ docker_username }}"
+    #     password: "{{ docker_password }}"
+    #     reauthorize: yes
