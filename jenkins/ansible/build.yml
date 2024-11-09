@@ -5,6 +5,8 @@
     workspace: "{{ workspace }}"
     registry: "{{ registry }}"
     image_tags: "{{ version | default('latest') }}"
+    docker_username: "{{ docker_username }}"
+    docker_password: "{{ docker_password }}"
   tasks:
     - name: Build the project using maven
       command: mvn clean package -DskipTests
@@ -14,9 +16,8 @@
       command: docker build -t "{{ registry }}:{{ image_tags }}" .
       args:
         chdir: "{{ workspace }}"
-    # - name: Login to registry
-    #   docker_login:
-    #     registry: https://index.docker.io/v1/
-    #     username: "{{ docker_username }}"
-    #     password: "{{ docker_password }}"
-    #     reauthorize: yes
+    - name: Login to registry
+      docker_login:
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
+        reauthorize: yes

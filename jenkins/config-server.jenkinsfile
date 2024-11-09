@@ -5,6 +5,8 @@ pipeline {
         SERVICE_NAME = 'Config-Server'
         REGISTRY_USER = 'kimleangsrd'
         REPO_NAME = 'config-server'
+        DOCKER_USERNAME = credentials('docker-username')
+        DOCKER_PASSWORD = credentials('docker-password')
         APP_ENV = getAppEnv(env.JENKINS_URL)
     }
     stages {
@@ -69,7 +71,9 @@ pipeline {
                             -e version="${APP_ENV}-${BUILD_NUMBER}" \
                             -e project_name="${PROJECT_NAME}" \
                             -e workspace="${WORKSPACE}/Config-Server" \
-                            -e registry="${REGISTRY_USER}/${REPO_NAME}"
+                            -e registry="${REGISTRY_USER}/${REPO_NAME}" \
+                            -e docker_username="${DOCKER_USERNAME}" \
+                            -e docker_password="${DOCKER_PASSWORD}"
                     """
                 }
             }
