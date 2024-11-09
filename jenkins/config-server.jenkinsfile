@@ -78,6 +78,23 @@ pipeline {
                 }
             }
         }
+        stage('Deployment') {
+            steps {
+                script {
+                    sh """
+                        ansible-playbook \
+                            ./DevOps-Deployment/jenkins/ansible/deployment.yml \
+                            -i ./DevOps-Deployment/jenkins/ansible/hosts \
+                            -e version="${APP_ENV}-${BUILD_NUMBER}" \
+                            -e project_name="${PROJECT_NAME}" \
+                            -e service_name="${SERVICE_NAME}" \
+                            -e registry="${REGISTRY_USER}/${REPO_NAME}" \
+                            -e docker_username=$DOCKER_USERNAME \
+                            -e docker_password=$DOCKER_PASSWORD
+                    """
+                }
+            }
+        }
     }
 }
 

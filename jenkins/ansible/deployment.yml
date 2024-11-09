@@ -2,108 +2,37 @@
 - hosts: digital-platform
   gather_facts: yes
   vars:
-    image_tags: "{{ version | default('latest') }}"
     project_name: "{{ project_name }}"
-    service_name: "{{ service_name }}"
-    app_port: "{{ app_port }}"
-    container_port: "{{ container_port }}"
-    registry_name: "{{ registry_name }}"
-    build_type: "{{ build_type }}"
-    workspace: "{{ WORKSPACE }}"
+    workspace: "{{ workspace }}"
+    registry: "{{ registry }}"
+    image_tags: "{{ version | default('latest') }}"
+    docker_username: "{{ docker_username }}"
+    docker_password: "{{ docker_password }}"
   tasks:
-    - name: Get instance profile info
-      amazon.aws.aws_caller_info:
-      register: aws_info
-
-    - set_fact:
-        ecr_registry_url: "{{ aws_info.account }}.dkr.ecr.ap-southeast-1.amazonaws.com"
-
-    - name: Get ECR token
-      shell: "aws ecr get-login-password --region ap-southeast-1"
-      register: ecr_token
-
-    - name: Log into ECR registry
-      docker_login:
-        registry_url: "{{ ecr_registry_url }}"
-        debug: yes
-        username: "AWS"
-        password: "{{ ecr_token.stdout }}"
+    - name: Login to registry
+      community.docker.docker_login:
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
         reauthorize: yes
-    
+
     - name: Create a network
-      docker_network:
-        name: digital-platform-network
-
-    - name: Start Service UI
-      community.docker.docker_compose_v2:
-        project_name: "{{ service_name }}"
-        recreate: always
-        definition:
-          services:
-            AMK-docker-compose:
-              container_name: "{{ service_name }}"
-              hostname: "{{ service_name }}"
-              image: "{{ ecr_registry_url }}/{{ project_name }}-{{ registry_name }}:{{ image_tags }}"
-              restart: "always"
-              environment:
-                TZ: "Asia/Phnom_Penh"
-              ports:
-                - "{{ app_port }}:{{ container_port }}"
-      when: build_type == 'UI'
-
-    - name: Copy ENV file
-      ansible.builtin.copy:
-        src: "{{ workspace }}/ansible/env/{{ service_name }}.env"
-        dest: "/home/amkdevops/app/env/{{ service_name }}.env"
-      when: build_type == 'API'
-
-    - name: Copy ENV file
-      ansible.builtin.copy:
-        src: "{{ workspace }}/ansible/env/uat.env"
-        dest: "/home/amkdevops/app/env/uat.env"
-      when: build_type == 'API'
-
-    - name: Start Service API
-      community.docker.docker_compose_v2:
-        project_name: "{{ service_name }}"
-        recreate: always
-        definition:
-          services:
-            AMK-docker-compose:
-              container_name: "{{ service_name }}"
-              hostname: "{{ service_name }}"
-              image: "{{ ecr_registry_url }}/{{ project_name }}-{{ registry_name }}:{{ image_tags }}"
-              env_file:
-                - /home/amkdevops/app/env/{{ service_name }}.env
-                - /home/amkdevops/app/env/uat.env
-              restart: always
-              volumes:
-                - /home/amkdevops/app/apim_priv_key.pem:/var/www/api/private/keys/apim_priv_key.pem
-                - /home/amkdevops/app/newCombine.cer:/opt/jboss/keycloak/newCombine.cer
-              ports:
-                - "{{ app_port }}:{{ container_port }}"
-      when: build_type == "API" and service_name != "config-server"
+      community.docker.docker_network:
+        name: "{{ project_name }}"
+        state: present
 
     - name: Start Config-Server API
-      community.docker.docker_compose_v2:
-        project_name: "{{ service_name }}"
-        recreate: always
-        definition:
-          services:
-            AMK-docker-compose:
-              container_name: "{{ service_name }}"
-              hostname: "{{ service_name }}"
-              image: "{{ ecr_registry_url }}/{{ project_name }}-{{ registry_name }}:{{ image_tags }}"
-              env_file:
-                - /home/amkdevops/app/env/{{ service_name }}.env
-              restart: always
-              ports:
-                - "{{ app_port }}:{{ container_port }}"
-      when: build_type == "API" and service_name == "config-server"
+      community.docker.docker_container:
+        name: config-server
+        image: "{{ registry }}/config-server:{{ image_tags }}"
+        state: started
+        restart_policy: always
+        networks:
+          - name: "{{ project_name }}"
+        env_file: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/_global.env"
 
-    - name: Add a container to a network, leaving existing containers connected
+    - name: Add a container to a network and leaving existing containers connected
       community.docker.docker_network:
-        name: digital-platform-network
+        name: "{{ project_name }}"
         connected:
           - "{{ service_name }}"
         appends: true
