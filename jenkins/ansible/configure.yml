@@ -3,42 +3,10 @@
   gather_facts: yes
   vars:
     git_branch: "{{ git_branch | default('main') }}"
-    stage: "{{ app_env | default('local') }}"
     workspace: "{{ workspace }}"
-    project_name: "{{ project_name }}"
     service_name: "{{ service_name }}"
     build_user: "{{ build_user | default('jenkins')}}"
   tasks:
-    - name: Install Maven and Git On RedHat
-      ansible.builtin.yum:
-        name:
-          - git
-          - maven
-        state: present
-        use_backend: "{{ 'dnf' if ansible_distribution_major_version | int >= 8 else 'yum' }}"
-      when: ansible_facts['os_family'] == "Redhat"
-
-    - name: Install Maven and Git On Debian
-      ansible.builtin.apt:
-        name:
-          - git
-          - maven
-        state: present
-      when: ansible_facts['os_family'] == "Debian"
-
-    - name: Install Maven and Git On Mac
-      ansible.builtin.homebrew:
-        name:
-          - git
-          - maven
-        state: present
-      when: ansible_facts['os_family'] == "Darwin"
-
-    - name: Install requests using pip
-      ansible.builtin.pip:
-        name: requests
-        state: present
-      
     - name: Creates {{ service_name }} directory
       ansible.builtin.file:
         path: "{{ workspace }}"

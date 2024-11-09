@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  labels:
+    app: elasticsearch
+spec:
+  ports:
+    - port: 9200
+      name: http
+    - port: 9300
+      name: transport
+  selector:
+    app: elasticsearch
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+spec:
+  serviceName: "elasticsearch"
+  replicas: 2  # Number of nodes in the Elasticsearch cluster
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+          ports:
+            - containerPort: 9200
+              name: http
+            - containerPort: 9300
+              name: transport
+          env:
+            - name: discovery.seed_hosts
+              value: "elasticsearch-0,elasticsearch-1"  # Names of the pods for discovery
+            - name: cluster.initial_master_nodes
+              value: "elasticsearch-0,elasticsearch-1"
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ES_JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: elasticsearch-configmap
+                  key: es_jvm_options
+            - name: cluster.name
+              valueFrom:
+                configMapKeyRef:
+                  name: elasticsearch-configmap
+                  key: cluster.name
+            - name: network.host
+              valueFrom:
+                configMapKeyRef:
+                  name: elasticsearch-configmap
+                  key: network.host
+            - name: xpack.security.enabled
+              valueFrom:
+                configMapKeyRef:
+                  name: elasticsearch-configmap
+                  key: xpack.security.enabled
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: elasticsearch-configmap
+                  key: elastic_password
+          volumeMounts:
+            - name: elasticsearch-data
+              mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi  # Adjust based on storage needs
