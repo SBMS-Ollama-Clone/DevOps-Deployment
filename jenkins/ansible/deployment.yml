@@ -45,7 +45,7 @@
         name: "{{ service_name }}"
         image: "{{ registry }}:{{ image_tags }}"
         state: started
-        restart_policy: always
+        restart_policy: on-failure
         networks:
           - name: "{{ project_name }}"
         env_file: "{{ workspace }}/_global.env"
