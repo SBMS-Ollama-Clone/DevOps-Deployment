@@ -7,6 +7,11 @@
     service_name: "{{ service_name }}"
     build_user: "{{ build_user | default('jenkins')}}"
   tasks:
+    - name: Install Pip PyYAML
+      ansible.builtin.pip:
+        name: PyYAML
+        state: present
+
     - name: Creates {{ service_name }} directory
       ansible.builtin.file:
         path: "{{ workspace }}"
