@@ -27,7 +27,7 @@
     - name: Copy the Global ENV file
       ansible.builtin.copy:
         remote_src: yes
-        src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/_global.env"
+        src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/env/_global.env"
         dest: "{{ workspace }}/_global.env"
 
     - name: Start Config-Server API
