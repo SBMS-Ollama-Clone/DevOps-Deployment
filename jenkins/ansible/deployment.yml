@@ -23,10 +23,11 @@
       community.docker.docker_network:
         name: "{{ project_name }}"
         state: present
-    
+
     - name: Copy the Global ENV file
       ansible.builtin.copy:
-        remote_src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/_global.env"
+        remote_src: yes
+        src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/_global.env"
         dest: "{{ workspace }}/_global.env"
 
     - name: Start Config-Server API
