@@ -106,8 +106,8 @@ pipeline {
                 }
             }
             environment {
-				SERVICE_PORT = "9999"
-				CONTAINER_PORT = "9999"
+				SERVICE_PORT = "9990"
+				CONTAINER_PORT = "9990"
 			}
             steps {
                 script {

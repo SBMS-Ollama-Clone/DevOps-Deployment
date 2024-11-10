@@ -135,8 +135,8 @@ pipeline {
                 }
             }
             environment {
-				SERVICE_PORT = "9990"
-				CONTAINER_PORT = "9990"
+				SERVICE_PORT = "9995"
+				CONTAINER_PORT = "9995"
                 VERSION = "${params.image_tag == '' ? 'latest' : params.image_tag}"
 			}
             steps {
