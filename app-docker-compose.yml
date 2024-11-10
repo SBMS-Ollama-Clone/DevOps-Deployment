@@ -1,0 +1,151 @@
+services:
+  config-server:
+    image: kimleangsrd/config-server:latest
+    container_name: config-server
+    ports:
+      - "9999:9999"
+    env_file:
+      - .env.docker
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=rabbitmq
+      - RABBITMQ_PASSWORD=rabbitmq
+    networks:
+      - backend
+      - monitoring
+
+  gateway-service:
+    image: kimleangsrd/gateway-service:latest
+    container_name: gateway-service
+    restart: on-failure
+    depends_on:
+      - config-server
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.docker
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - backend
+      - monitoring
+      
+  auth-service:
+    image: kimleangsrd/auth-service:latest
+    container_name: auth-service
+    restart: on-failure
+    depends_on:
+      - config-server
+    ports:
+      - "8888:8888"
+    env_file:
+      - .env.docker
+    environment:
+      - DATASOURCE_URL=jdbc:postgresql://postgresql:5432/auth-service
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=rabbitmq
+      - RABBITMQ_PASSWORD=rabbitmq
+    networks:
+      - backend
+      - monitoring
+
+  chat-service:
+    image: kimleangsrd/chat-service:latest
+    container_name: chat-service
+    restart: on-failure
+    depends_on:
+      - config-server
+    ports:
+      - "9990:9990"
+    env_file:
+      - .env.docker
+    environment:
+      - DATASOURCE_URL=jdbc:postgresql://postgresql:5432/chat-service
+      - KAFKA_SCHEMA_REGISTRY_URL=http://schema-registry:8085
+      - KAFKA_BOOTSTRAP_SERVERS=broker:9092
+    networks:
+      - backend
+      - monitoring
+
+  content-service:
+    image: kimleangsrd/content-service:latest
+    container_name: content-service
+    restart: on-failure
+    depends_on:
+      - config-server
+    ports:
+      - "9991:9991"
+    env_file:
+      - .env.docker
+    environment:
+      - DATASOURCE_URL=jdbc:postgresql://postgresql:5432/content-service
+    networks:
+      - backend
+      - monitoring
+
+  setting-service:
+    image: kimleangsrd/setting-service:latest
+    container_name: setting-service
+    restart: on-failure
+    depends_on:
+      - config-server
+    ports:
+      - "9992:9992"
+    env_file:
+      - .env.docker
+    environment:
+      - DATASOURCE_URL=jdbc:postgresql://postgresql:5432/setting-service
+    networks:
+      - backend
+      - monitoring
+
+  mail-service:
+    image: kimleangsrd/mail-service:latest
+    container_name: mail-service
+    restart: on-failure
+    depends_on:
+      - config-server
+    ports:
+      - "9995:9995"
+    env_file:
+      - .env.docker
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=rabbitmq
+      - RABBITMQ_PASSWORD=rabbitmq
+    networks:
+      - backend
+      - monitoring
+
+  notification-service:
+    image: kimleangsrd/notification-service:latest
+    container_name: notification-service
+    restart: on-failure
+    depends_on:
+      - config-server
+    ports:
+      - "9996:9996"
+    env_file:
+      - .env.docker
+    environment:
+      - KAFKA_SCHEMA_REGISTRY_URL=http://schema-registry:8085
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+    networks:
+      - backend
+      - monitoring
+
+networks:
+  backend:
+    driver: bridge
+    name: backend
+    external: true
+  monitoring:
+    driver: bridge
+    name: monitoring
+    external: true

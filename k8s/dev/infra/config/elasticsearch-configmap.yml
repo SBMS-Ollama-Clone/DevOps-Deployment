@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-configmap
+data:
+  cluster.name: "ollama_service"
+  es_jvm_options: "-Xms512m -Xmx512m"
+  network.host: "0.0.0.0"
+  xpack.security.enabled: "false"
+  elastic_password: "elastic"

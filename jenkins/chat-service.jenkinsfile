@@ -1,0 +1,170 @@
+pipeline {
+    agent any
+    environment {
+        PROJECT_NAME = 'sbms-ollama-clone'
+        SERVICE_NAME = 'chat-service'
+        REGISTRY_USER = 'kimleangsrd'
+        REPO_NAME = 'chat-service'
+        DOCKER_USERNAME = credentials('docker-username')
+        DOCKER_PASSWORD = credentials('docker-password')
+        APP_ENV = getAppEnv(env.JENKINS_URL)
+    }
+    stages {
+        stage('Parameters') {
+            steps {
+                script {
+                    properties([
+                        parameters([
+                            [$class: 'ChoiceParameter',
+                                    choiceType: 'PT_SINGLE_SELECT',
+                                    description: '',
+                                    filterLength: 1,
+                                    filterable: true,
+                                    name: 'branch',
+                                    script: [
+                                        $class: 'GroovyScript',
+                                        fallbackScript: [
+                                            classpath: [],
+                                            sandbox: false,
+                                            script:
+                                                    "return ['Could not get The Branch Name']"
+                                        ],
+                                        script: [ classpath: [], sandbox: false, script: """
+                                        def gettags = ("git ls-remote -t -h git@github.com:SBMS-Ollama-Clone/Chat-Service.git").execute()
+                                        def branchList = gettags.text.readLines().collect {
+                                            it.split()[1].replaceAll('refs/heads/', '').replaceAll('refs/tags/', '')
+                                        }
+                                        branchList.add(0, 'main:selected')
+                                        return branchList
+                                        """.stripIndent()
+                                        ]
+                                    ]
+                            ],
+                            [$class: 'BooleanParameterDefinition',
+                                    defaultValue: false,
+                                    description: 'Start container without build',
+                                    name: 'only_start_container'
+                            ],
+                            [$class: 'StringParameterDefinition',
+                                    defaultValue: '',
+                                    description: 'Enter the tag of the image to start the container. Note: works, if only_start_container must be true.',
+                                    name: 'image_tag'
+                            ]
+                        ])
+                    ])
+                }
+            }
+        }
+        stage('Configure') {
+            when {
+                expression {
+                    return params.only_start_container == false
+                }
+            }
+            steps {
+                script {
+                    sh """
+                        ansible-playbook -v \
+                            ./DevOps-Deployment/jenkins/ansible/configure.yml \
+                            -i ./DevOps-Deployment/jenkins/ansible/hosts \
+                            -e workspace="${WORKSPACE}/chat-service" \
+                            -e project_name="${PROJECT_NAME}" \
+                            -e service_name="${SERVICE_NAME}" \
+                            -e build_user="${BUILD_USER}" \
+                            -e git_branch="${branch}"
+                    """
+                }
+            }
+        }
+        stage('Build') {
+            when {
+                expression {
+                    return params.only_start_container == false
+                }
+            }
+            steps {
+                script {
+                    sh """
+                        ansible-playbook -v \
+                            ./DevOps-Deployment/jenkins/ansible/build.yml \
+                            -i ./DevOps-Deployment/jenkins/ansible/hosts \
+                            -e version="${APP_ENV}-${BUILD_NUMBER}" \
+                            -e project_name="${PROJECT_NAME}" \
+                            -e service_name="${SERVICE_NAME}" \
+                            -e workspace="${WORKSPACE}/chat-service" \
+                            -e registry="${REGISTRY_USER}/${REPO_NAME}" \
+                            -e docker_username=$DOCKER_USERNAME \
+                            -e docker_password=$DOCKER_PASSWORD 
+                    """
+                }
+            }
+        }
+        stage('Deployment') {
+            when {
+                expression {
+                    return params.only_start_container == false
+                }
+            }
+            environment {
+				SERVICE_PORT = "9999"
+				CONTAINER_PORT = "9999"
+			}
+            steps {
+                script {
+                    sh """
+                        ansible-playbook -v \
+                            ./DevOps-Deployment/jenkins/ansible/deployment.yml \
+                            -i ./DevOps-Deployment/jenkins/ansible/hosts \
+                            -e version="${APP_ENV}-${BUILD_NUMBER}" \
+                            -e project_name="${PROJECT_NAME}" \
+                            -e service_name="${SERVICE_NAME}" \
+                            -e workspace="${WORKSPACE}" \
+                            -e registry="${REGISTRY_USER}/${REPO_NAME}" \
+                            -e docker_username=$DOCKER_USERNAME \
+                            -e docker_password=$DOCKER_PASSWORD \
+                            -e service_port=$SERVICE_PORT \
+                            -e container_port=$CONTAINER_PORT
+                    """
+                }
+            }
+        }
+        stage('Only Start Container') {
+            when {
+                expression {
+                    return params.only_start_container == true
+                }
+            }
+            environment {
+				SERVICE_PORT = "9990"
+				CONTAINER_PORT = "9990"
+                VERSION = "${params.image_tag == '' ? 'latest' : params.image_tag}"
+			}
+            steps {
+                script {
+                    sh """
+                        ansible-playbook -v \
+                            ./DevOps-Deployment/jenkins/ansible/deployment.yml \
+                            -i ./DevOps-Deployment/jenkins/ansible/hosts \
+                            -e version="${VERSION}" \
+                            -e project_name="${PROJECT_NAME}" \
+                            -e service_name="${SERVICE_NAME}" \
+                            -e workspace="${WORKSPACE}" \
+                            -e registry="${REGISTRY_USER}/${REPO_NAME}" \
+                            -e docker_username=$DOCKER_USERNAME \
+                            -e docker_password=$DOCKER_PASSWORD \
+                            -e service_port=$SERVICE_PORT \
+                            -e container_port=$CONTAINER_PORT
+                    """
+                }
+            }
+        }
+    }
+}
+
+def getAppEnv(jenkins_url) {
+    if (jenkins_url.contains('localhost')) {
+        return 'local'
+    } else if (jenkins_url.contains('dev')) {
+        return 'dev'
+    }
+}

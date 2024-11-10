@@ -1,0 +1,33 @@
+# consul-agent.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consul-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: consul
+      component: agent
+  template:
+    metadata:
+      labels:
+        app: consul
+        component: agent
+    spec:
+      containers:
+        - name: consul
+          image: hashicorp/consul:latest
+          command:
+            [
+              "consul", "agent", "-retry-join", "consul-server",
+              "-client", "0.0.0.0", "-data-dir", "/consul/data"
+            ]
+          ports:
+            - containerPort: 8500
+          volumeMounts:
+            - name: data
+              mountPath: /consul/data
+      volumes:
+        - name: data
+          emptyDir: { }

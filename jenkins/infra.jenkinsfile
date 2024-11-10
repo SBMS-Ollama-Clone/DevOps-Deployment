@@ -1,0 +1,14 @@
+pipeline {
+    agent any
+    stages {
+        stage("Infra Docker Compose Up") {
+            steps {
+                script {
+                    sh """
+                       docker-compose -f docker-compose.yml up -d
+                    """
+                }
+            }
+        }
+    }
+}

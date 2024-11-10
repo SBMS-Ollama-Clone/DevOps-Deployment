@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  labels:
+    app: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: docker.elastic.co/logstash/logstash:8.15.3
+          env:
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch:9200" # Adjust if needed
+          ports:
+            - containerPort: 5044 # Default Logstash Beats input port
+          volumeMounts:
+            - name: logstash-configmap
+              mountPath: /usr/share/logstash/pipeline
+      volumes:
+        - name: logstash-configmap
+          configMap:
+            name: logstash-configmap
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  labels:
+    app: logstash
+spec:
+  ports:
+    - port: 5044
+      targetPort: 5044
+      protocol: TCP
+  selector:
+    app: logstash

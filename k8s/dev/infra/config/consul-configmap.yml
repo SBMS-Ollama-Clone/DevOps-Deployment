@@ -1,0 +1,15 @@
+# consul-config.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consul-config
+data:
+  consul.json: |
+    {
+      "server": true,
+      "bootstrap_expect": 1,
+      "ui": true,
+      "datacenter": "dc1",
+      "data_dir": "/consul/data",
+      "client_addr": "0.0.0.0"
+    }

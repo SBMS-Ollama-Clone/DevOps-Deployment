@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: kimleangsrd/auth-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8888
+          resources:
+            requests:
+              cpu: 10m
+              memory: 500Mi
+          envFrom:
+            - configMapRef:
+                name: common-config
+          env:
+            - name: DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: DATASOURCE_URL
+                  name: auth-service-configmap
+            - name: DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  key: DATASOURCE_USERNAME
+                  name: auth-service-configmap
+            - name: DATASOURCE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  key: DATASOURCE_PASSWORD
+                  name: auth-service-configmap

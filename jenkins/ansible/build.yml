@@ -1,0 +1,29 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  vars:
+    workspace: "{{ workspace }}"
+    registry: "{{ registry }}"
+    image_tag: "{{ version | default('latest') }}"
+    docker_username: "{{ docker_username }}"
+    docker_password: "{{ docker_password }}"
+  tasks:
+    - name: Build the project using maven
+      command: mvn clean package -DskipTests
+      args:
+        chdir: "{{ workspace }}"
+
+    - name: Build the docker image
+      command: docker build -t "{{ registry }}:{{ image_tag }}" .
+      args:
+        chdir: "{{ workspace }}"
+
+    - name: Login to registry
+      community.docker.docker_login:
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
+        reauthorize: yes
+
+    - name: Push the docker image to registry
+      community.docker.docker_image_push:
+        name: "{{ registry }}:{{ image_tag }}"

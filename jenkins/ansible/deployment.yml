@@ -1,0 +1,72 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  vars:
+    project_name: "{{ project_name }}"
+    service_name: "{{ service_name }}"
+    workspace: "{{ workspace }}"
+    registry: "{{ registry }}"
+    image_tag: "{{ version | default('latest') }}"
+    docker_username: "{{ docker_username }}"
+    docker_password: "{{ docker_password }}"
+    service_port: "{{ service_port }}"
+    container_port: "{{ container_port }}"
+  tasks:
+    - name: Login to registry
+      community.docker.docker_login:
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
+        reauthorize: yes
+
+    - name: Echo workspace var
+      ansible.builtin.debug:
+        msg: "{{ workspace }}"
+
+    - name: Create a network
+      community.docker.docker_network:
+        name: "{{ project_name }}"
+        state: present
+
+    - name: Copy the Global ENV file
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/env/_global.env"
+        dest: "{{ workspace }}/_global.env"
+
+    - name: Copy the Specific ENV file
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ workspace }}/DevOps-Deployment/jenkins/ansible/env/{{ service_name }}.env"
+        dest: "{{ workspace }}/{{ service_name }}.env"
+
+    - name: Merge the Specific ENV file with the Global ENV file
+      ansible.builtin.shell: cat {{ workspace }}/{{ service_name }}.env >> {{ workspace }}/_global.env
+
+    - name: Cat the merged file
+      ansible.builtin.shell: cat {{ workspace }}/_global.env
+
+    - name: Start SBMS Service API
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        image: "{{ registry }}:{{ image_tag }}"
+        state: started
+        restart_policy: on-failure
+        ports:
+          - "{{ service_port }}:{{ container_port }}"
+        networks:
+          - name: "{{ project_name }}"
+        env_file: "{{ workspace }}/_global.env"
+
+    - name: Add a container to a network and leaving existing containers connected
+      community.docker.docker_network:
+        name: backend
+        connected:
+          - "{{ service_name }}"
+        appends: true
+
+    - name: Add a container to a network and leaving existing containers connected
+      community.docker.docker_network:
+        name: monitoring
+        connected:
+          - "{{ service_name }}"
+        appends: true

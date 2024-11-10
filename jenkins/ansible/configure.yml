@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  vars:
+    git_branch: "{{ git_branch | default('main') }}"
+    workspace: "{{ workspace }}"
+    service_name: "{{ service_name }}"
+    build_user: "{{ build_user | default('jenkins')}}"
+  tasks:
+    - name: Install Pip PyYAML
+      ansible.builtin.pip:
+        name: PyYAML
+        state: present
+
+    - name: Creates {{ service_name }} directory
+      ansible.builtin.file:
+        path: "{{ workspace }}"
+        state: directory
+
+    - name: Clone code if not exists
+      ansible.builtin.git:
+        repo: https://github.com/SBMS-Ollama-Clone/{{ service_name }}.git
+        dest: "{{ workspace }}"
+        single_branch: yes
+        version: "{{ git_branch }}"
+        update: yes
