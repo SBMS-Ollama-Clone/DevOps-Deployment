@@ -27,5 +27,5 @@ To setup the Jenkins, see [README](jenkins/README.md) file in the jenkins direct
 - **loki**: Log aggregation system, port 3100 for connection
 - **tempo**: Distributed tracing system, port 3100 -> 3110, 9411 for zipkin
 - **prometheus**: Monitoring system, port 9090 for connection
-- **grafana**: Visualization tool for Prometheus, port 3000 -> 3300
+- **grafana**: Visualization tool for Prometheus, port 3000 -> 3300, Use Dashboard ID: 19964 for Spring Boot Stats
 - **alertmanager**: Alerting system for Prometheus, port 9093 for connection

@@ -48,7 +48,7 @@ datasources:
   - name: Elastic
     type: elasticsearch
     access: proxy
-    editable: true
+    editable: false
     basicAuth: true
     basicAuthUser: elastic
     basicAuthPassword: elastic

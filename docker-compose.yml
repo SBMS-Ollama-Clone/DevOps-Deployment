@@ -82,6 +82,7 @@ services:
   broker:
     image: confluentinc/cp-kafka:latest
     container_name: broker
+    restart: on-failure
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -139,8 +140,8 @@ services:
       - --enable-feature=exemplar-storage
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./docker/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./docker/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
     ports:
       - "9090:9090"
     networks:
@@ -150,7 +151,7 @@ services:
     container_name: tempo
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
-      - ./docker/tempo/tempo.yml:/etc/tempo.yaml:ro
+      - ./docker/tempo/tempo.yml:/etc/tempo.yaml
       - ./data/tempo:/tmp/tempo
     ports:
       - "3110:3100"  # Tempo
@@ -161,12 +162,8 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     volumes:
-      - ./docker/grafana:/etc/grafana/provisioning/datasources:ro
+      - ./docker/grafana:/etc/grafana/provisioning/datasources
       - ./data/grafana:/var/lib/grafana
-    environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
     ports:
       - "3300:3000"
     networks:
@@ -181,6 +178,18 @@ services:
     ports:
       - "9093:9093"
     networks:
+      - monitoring
+  uptime-kuma:
+    image: louislam/uptime-kuma:2.0.0-beta.0
+    container_name: uptime-kuma
+    restart: always
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data/uptime-kuma:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - backend
       - monitoring
 
   # ELK Stack
