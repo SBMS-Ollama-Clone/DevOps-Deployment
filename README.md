@@ -22,7 +22,7 @@ To setup the Jenkins, see [README](jenkins/README.md) file in the jenkins direct
 - **zookeeper**: Centralized service for maintaining configuration information of Kafka broker, port 2181 for connection
 - **broker**: Kafka message broker for the Chat and Notification services, port 9092, 29092 for internal communication
 - **schema-registry**: Centralized service for maintaining Avro schemas, port 8081 -> 8085
-- **kafka-ui**: Web UI tool for Kafka, port 8080 -> 8086
+- **kafka-ui**: Web UI tool for Kafka, port 8880 -> 8086
 - **redis**: Cache for the Gateway and Auth services, port 6379
 - **loki**: Log aggregation system, port 3100 for connection
 - **tempo**: Distributed tracing system, port 3100 -> 3110, 9411 for zipkin

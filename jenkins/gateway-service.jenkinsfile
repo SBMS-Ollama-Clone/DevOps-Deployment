@@ -107,7 +107,7 @@ pipeline {
             }
             environment {
 				SERVICE_PORT = "8880"
-				CONTAINER_PORT = "8080"
+				CONTAINER_PORT = "8880"
 			}
             steps {
                 script {
@@ -136,7 +136,7 @@ pipeline {
             }
             environment {
 				SERVICE_PORT = "8880"
-				CONTAINER_PORT = "8080"
+				CONTAINER_PORT = "8880"
                 VERSION = "${params.image_tag == '' ? 'latest' : params.image_tag}"
 			}
             steps {

@@ -114,7 +114,7 @@ services:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
     ports:
-      - "8086:8080"
+      - "8086:8880"
     depends_on:
       - broker
     environment:
